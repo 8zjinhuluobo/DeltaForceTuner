@@ -178,7 +178,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File build-cpp.ps1
 # 3) 打包安装程序（内嵌主程序、说明、预览图、哈希）
 .\build-cpp.ps1
 ```
-
+由豆姐和大肥鱼维护（豆姐用的token少啊）
+测试版由dsh编写，上传版本由豆包工作编写
 工具链依赖：
 
 - `csc`：`C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe`（.NET Framework 4.8，系统自带）
