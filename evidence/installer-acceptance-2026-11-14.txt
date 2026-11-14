@@ -1,0 +1,124 @@
+真机安装 / 卸载验收记录
+========================
+
+日期：2026-11-14
+系统：Windows 11 Pro 25H2，Build 26200.9711
+权限：普通用户（非管理员，全程未提权，未出现 UAC 弹窗）
+环境特点：APPDATA 被重定向到 D:\WINDOS\ROAMING；Desktop 已知文件夹被重定向到 D:\WINDOS\新建文件夹
+
+一、被测产物
+
+- 安装包：dist\DeltaForceTunerSetup.exe
+  大小 802304 字节
+  SHA256 6779505D5749518B9FE7A7E927718E495C84632B1132E14071DFFAA48D3DBF88
+  （当日共构建三次：修正日志格式串 → 更新 README 内容并重新嵌入 → 本次最终物。
+    进程内先后以 1DB25CCC…、6779505D… 两个版本各跑过完整安装/卸载，结论一致。）
+- 主程序：dist\DeltaForceTuner.exe
+  大小 117248 字节
+  SHA256 43C14A5F290DC2DD2765305319BB3C2DEE334F668BDA5C4C2BC71A67C4376DA5（未变）
+- 哈希文件：dist\Setup-SHA256.txt（Build: 2026-11-14）、dist\SHA256.txt
+
+二、执行方式
+
+安装包已先复制到 %TEMP%\acc-run\ 再执行，原因见第四节第 2 条。
+
+安装：DeltaForceTunerSetup.exe --install --no-launch
+卸载：注册表登记的 QuietUninstallString，即
+      "<安装目录>\Uninstall.exe" --uninstall --quiet
+      （与「设置 → 应用 → 已安装的应用」里的卸载是同一条命令）
+
+三、结果
+
+[1] 静默安装
+    退出码 0
+    安装器日志：OK C:\Users\罗\AppData\Local\Programs\DeltaForceTuner
+
+[2] 安装目录内容（6 个文件，全部到位）
+    DeltaForceTuner.exe   117248
+    Uninstall.exe         273920
+    README.md               9341
+    使用说明.txt            3017
+    preview.png            89888
+    SHA256.txt               165
+
+[3] 开始菜单快捷方式
+    %APPDATA%\Microsoft\Windows\Start Menu\Programs\DeltaForceTuner\三角洲行动调优助手.lnk  存在
+    目标     C:\Users\罗\AppData\Local\Programs\DeltaForceTuner\DeltaForceTuner.exe
+    工作目录 C:\Users\罗\AppData\Local\Programs\DeltaForceTuner
+    图标     ...\DeltaForceTuner.exe,0
+
+[4] 桌面快捷方式
+    D:\WINDOS\新建文件夹\三角洲行动调优助手.lnk（Desktop 被重定向后即为真实桌面）  存在
+    目标 / 工作目录 / 图标 同上，正确
+
+[5] 注册表卸载项
+    HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\DeltaForceTuner
+    DisplayName    三角洲行动 · 本机调优助手
+    DisplayVersion 1.0.0
+    EstimatedSize  482 KB
+    NoModify=1  NoRepair=1
+    UninstallString      "<安装目录>\Uninstall.exe" --uninstall
+    QuietUninstallString "<安装目录>\Uninstall.exe" --uninstall --quiet
+
+[6] 安装版主程序自检
+    <安装目录>\DeltaForceTuner.exe --selftest=...   退出码 0
+    RESULT=PASS warnings=0
+    识别：6P+8E（i9-12900H，14 核 20 线程）、游戏目录、ACE 目录、VBS/HAGS/电源状态正常
+
+[7] 静默卸载
+    退出码 0
+    卸载器日志：OK uninstall
+
+[8] 卸载后清理
+    程序目录            已删除
+    开始菜单目录        已删除
+    桌面快捷方式        已删除
+    HKCU 卸载注册表项   已删除
+    %LocalAppData%\DeltaForceTuner（设置备份）  保留，内含 state.xml、app.log —— 按设计保留，需手动删
+
+四、本次发现并修复的两个缺陷
+
+1. 安装器日志只输出首字符（已修复）
+   AppendLog 用宽字符 swprintf，格式串却写 L"%s"。MinGW 下 %s 按窄字符处理，
+   于是 "OK C:\..." 只写出 "O"、"FAIL ..." 只写出 "F"，日志基本无用。
+   已改为 %ls。修复后实测日志完整输出：
+       2026-11-14 19:22:24  OK C:\Users\罗\AppData\Local\Programs\DeltaForceTuner
+       2026-11-14 19:22:35  OK uninstall
+   验证方法：安装/卸载各跑一次，读 %TEMP%\DeltaForceTunerSetup.log（UTF-16LE）。
+
+2. 在项目目录内直接运行安装包会静默失败（已知限制，非代码缺陷）
+   现象：双击或命令行执行 D:\...\DeltaForceTuner\dist\DeltaForceTunerSetup.exe --install，
+        进程立刻以退出码 1 结束，不安装、不写日志、不报错。
+   排查：同一份二进制复制到 %TEMP% 后执行，退出码 0、安装 6 个文件全部成功；
+        用带探针的同源代码重建版本（放在项目目录）同样退出 1，且探针文件都写不出来。
+        说明问题与安装包无关，而是「从哪里运行」。
+   根因：该项目目录带有完整性标签 Mandatory Label\Low Mandatory Level，
+        在此目录内启动的进程继承低完整性级别，无法写入 %LocalAppData%\Programs
+        与 %TEMP%，于是建日志失败、装文件失败，且因日志建不出来而完全静默。
+        该标签是 DeepSeek Harness 工作区留下的（见同级 acl-recovery 审计目录），不是本工具造成。
+   规避：把 DeltaForceTunerSetup.exe 复制到桌面或任意普通目录再运行。
+        已写入 README「已知限制」。
+
+五、游戏文件比对（本工具不写游戏目录，此节用于证明零改动）
+
+基线见 evidence\game-hashes-before.txt，本次比对结果：
+
+    ACE-Service64.exe    未变   8FE1D8D4935B4CD572AC8EB3A46C188C83E1BFDA2259681098211E55286F76FE
+    SGuard64.exe         未变   349ACB95D8308AC10884E4A37C9A2C2B3B557E469646E7EB301B9208786E9B72
+    SGuardSvc64.exe      未变   2064356BE9F94116C1A834CB4CFF7149AACC59211CA668F0428163C295102286
+
+    DeltaForceClient-Win64-Shipping.exe  已变
+        基线 79FB7B105170141ED863331D36833A73062E66BF5291B2364FE3A64C18336203  514154112 字节
+        现状 B00A4D11AAF8B11B72FFCA8D91B65A586B89E020E99C414A083C1F0EF33B750B  524423208 字节
+        文件修改时间 2026/11/8 15:28:24
+
+    说明：主程序的变化发生在 2026-11-08，早于本次安装（2026-11-14）也早于第一版安装包构建（2026-10-24），
+    且文件大小从 514154112 变为 524423208（+10 MB），属 Steam 对游戏本体的更新，
+    与本工具无关 —— 本工具不写游戏目录，安装/卸载清单里也没有 game 相关路径。
+    不能表述为「游戏文件全部未变」，故在此如实记录差异。
+
+六、其他
+
+- 安装包未做商业代码签名，SmartScreen 可能提示「未知发布者」，可核对 SHA256 自证。
+- 全程只写 HKCU 卸载项、开始菜单与桌面快捷方式、%LocalAppData% 下两个目录；未装服务、未写开机启动、未提权。
+- 卸载默认保留 %LocalAppData%\DeltaForceTuner 设置备份；要一并删除需加 --delete-settings。

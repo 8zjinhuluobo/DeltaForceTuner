@@ -1,0 +1,55 @@
+﻿三角洲行动 · 本机调优助手 — 只读自检
+生成时间: 2026-10-24 21:46:10
+程序版本: 1.0.0
+管理员权限: 否
+配置文件: D:\WINDOS\V114514\deepseek-harness\default-workspace\DeltaForceTuner\dist\data\state.xml
+
+[系统]
+OS: Windows 11 Pro 25H2 Build 26200.9168
+CPU: 12th Gen Intel(R) Core(TM) i9-12900H
+拓扑: 14 核 20 线程 · 6P+8E (P=6, E=8)
+  P1   性能核  mask=0x3 firstCPU=0 logical=2 eff=1
+  P2   性能核  mask=0xC firstCPU=2 logical=2 eff=1
+  P3   性能核  mask=0x30 firstCPU=4 logical=2 eff=1
+  P4   性能核  mask=0xC0 firstCPU=6 logical=2 eff=1
+  P5   性能核  mask=0x300 firstCPU=8 logical=2 eff=1
+  P6   性能核  mask=0xC00 firstCPU=10 logical=2 eff=1
+  E1   能效核  mask=0x1000 firstCPU=12 logical=1 eff=0
+  E2   能效核  mask=0x2000 firstCPU=13 logical=1 eff=0
+  E3   能效核  mask=0x4000 firstCPU=14 logical=1 eff=0
+  E4   能效核  mask=0x8000 firstCPU=15 logical=1 eff=0
+  E5   能效核  mask=0x10000 firstCPU=16 logical=1 eff=0
+  E6   能效核  mask=0x20000 firstCPU=17 logical=1 eff=0
+  E7   能效核  mask=0x40000 firstCPU=18 logical=1 eff=0
+  E8   能效核  mask=0x80000 firstCPU=19 logical=1 eff=0
+内存: 15.7 GB（可用 3.8 GB） (占用 75%)
+GPU: Intel(R) Iris(R) Xe Graphics / 驱动 32.0.101.7092
+显示: 2520x1680 @ 60Hz
+电源: 已插电 / 计划 平衡 / AC覆盖 最佳性能
+VBS: 关闭 / 内存完整性: 关闭
+HAGS: 未设置
+
+[游戏与 ACE]
+游戏目录: D:\APPs_D\Steam\steamapps\common\Delta Force
+游戏主程序: D:\APPs_D\Steam\steamapps\common\Delta Force\Game\DeltaForce\Binaries\Win64\DeltaForceClient-Win64-Shipping.exe
+ACE 目录: D:\APPs_D\Steam\steamapps\common\Delta Force\Game\DeltaForce\Binaries\Win64\AntiCheatExpert
+游戏运行: 否
+ACE 用户态进程: 0
+  (未运行 ACE；启动游戏后再测试)
+
+[设置状态]
+  game_mode      未设置      Windows 游戏模式
+  game_dvr       未启用      关闭后台录制
+  multimedia     未启用      多媒体与网络调度
+  mouse_accel    未启用      关闭鼠标加速
+  power_perf     已启用      电源模式：最佳性能
+  hags           未设置      硬件加速 GPU 调度
+
+[亲和性 API 冒烟测试]
+通过：当前进程可绑定到 CPU 19，并已恢复。
+
+[只读保证]
+本次自检只读取系统/游戏信息；没有写入注册表、电源计划或游戏文件。
+亲和性冒烟测试只会短暂限制本进程自身，并立即恢复。
+
+RESULT=PASS warnings=0

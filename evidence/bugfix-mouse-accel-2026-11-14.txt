@@ -1,0 +1,72 @@
+缺陷修复记录：「鼠标加速」开关把设置写反
+==========================================
+
+日期：2026-11-14
+涉及文件：src\Native.cs（SetMouseParameters）、src\TweakManager.cs（MouseTweak，未改，调用方式不变）
+
+一、现象
+
+用户反馈：勾选「关闭鼠标加速」后手感反而更差，像是反向生效。
+
+二、根因
+
+MouseTweak 通过 SystemParametersInfo(SPI_SETMOUSE) 立即生效，参数是一个 3 个 int 的数组。
+Windows 要求的顺序是：
+
+    { threshold1, threshold2, acceleration }
+
+而旧代码写的是：
+
+    Marshal.WriteInt32(p, 0, speed);        // speed 写进了 threshold1
+    Marshal.WriteInt32(p, 4, threshold1);   // threshold1 写进了 threshold2
+    Marshal.WriteInt32(p, 8, threshold2);   // threshold2 写进了 acceleration
+
+即整体错了一位。
+
+三、为什么平时看不出来，一恢复就出事
+
+- 关闭加速：传 (speed=0, t1=0, t2=0)，错位后仍是全 0，结果碰巧正确。
+- 停用 / 恢复原始：传 (speed=1, t1=6, t2=10)，错位后变成
+  threshold1=1、threshold2=6、acceleration=10 —— 加速被设成 10（最大），
+  于是“恢复原始”反而把指针加速拉满，手感变得非常飘。
+
+更糟的是 SPI_SETMOUSE 带 SPIF_UPDATEINIFILE，会把错位后的值直接写回注册表，
+所以点一次「恢复原始」就会把 HKCU\Control Panel\Mouse 写成
+MouseSpeed=10 / MouseThreshold1=1 / MouseThreshold2=6（远离默认的 1 / 6 / 10）。
+
+四、实测证据
+
+1. 修复前，本机注册表处于被写坏的状态：
+   MouseSpeed=10  MouseThreshold1=1  MouseThreshold2=6  MouseSensitivity=20
+   而工具自己的备份（%LocalAppData%\DeltaForceTuner\state.xml）记录的原始值是
+   MouseSpeed=1   MouseThreshold1=6  MouseThreshold2=10
+
+2. 直接用正确顺序 {6, 10, 1} 调用 SPI_SETMOUSE：
+   调用前 MouseSpeed=10 T1=1 T2=6
+   调用后 MouseSpeed=1  T1=6 T2=10     ← 值与备份一致，确认 MSDN 顺序为 {T1,T2,Accel}
+
+3. 修复后重新编译，用程序自身跑往返（GUI 带 --apply / --disable 参数，4 秒后读注册表）：
+
+   起始          MouseSpeed=1  T1=6  T2=10
+   --apply=mouse_accel     MouseSpeed=0  T1=0  T2=0     （加速已关闭）
+   --disable=mouse_accel   MouseSpeed=1  T1=6  T2=10    （回到原值，不再变 10/1/6）
+
+五、修复内容
+
+src\Native.cs 中 SetMouseParameters 改为按正确顺序填充数组，并加注释说明顺序，
+避免以后又被“看起来对称”的写法改回去：
+
+    Marshal.WriteInt32(p, 0, threshold1);
+    Marshal.WriteInt32(p, 4, threshold2);
+    Marshal.WriteInt32(p, 8, speed);
+
+六、影响面
+
+- 只影响「关闭鼠标加速」这一项；其它开关（游戏模式、后台录制、多媒体调度、HAGS、电源模式）不受影响。
+- 已经被写坏的用户：点一次「恢复原始」即可（修复版会把 1/6/10 正确写回）。
+  本机已在修复过程中恢复到 MouseSpeed=1 / Threshold1=6 / Threshold2=10。
+
+七、遗留
+
+- 该开关没有单元测试；如后续做工程化，可把「apply → 0/0/0、disable → 原值」做成自动化回归。
+- 版本号未改（仍为 1.0.0），是否升到 1.0.1 / 1.1.0 待定。

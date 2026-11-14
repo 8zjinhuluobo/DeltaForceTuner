@@ -1,0 +1,20 @@
+#pragma once
+
+#define IDI_APP 201
+
+#define IDR_APP 101
+#define IDR_UNINSTALL 102
+#define IDR_README 103
+#define IDR_PREVIEW 104
+#define IDR_SHA 105
+#define IDR_README_MD 106
+
+#define IDC_EDIT_DIR 1001
+#define IDC_BROWSE 1002
+#define IDC_DESKTOP 1003
+#define IDC_LAUNCH 1004
+#define IDC_INSTALL 1005
+#define IDC_CANCEL 1006
+#define IDC_PROGRESS 1007
+#define IDC_DELETE_SETTINGS 1008
+#define IDC_UNINSTALL 1009

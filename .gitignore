@@ -1,0 +1,23 @@
+# 构建中间产物（由 build.ps1 / build-cpp.ps1 重新生成）
+/build/
+/build-cpp/
+
+# 二进制与生成物：仓库只收源码
+*.exe
+/dist/*.zip
+/dist/*.png
+/dist/SHA256.txt
+/dist/Setup-SHA256.txt
+/assets/app.ico
+/evidence/*.png
+
+# 个人设置备份与日志
+/data/
+*.log
+*.user
+
+# 说明：
+# - dist\使用说明.txt 是构建输入（会被嵌入安装包），属于源码，纳入版本控制。
+# - dist\preview.png 与 assets\app.ico 是构建输入但为二进制，可分别由
+#   `DeltaForceTuner.exe --render dist\preview.png` 和 `assets\make-icon.ps1` 重新生成，故不纳入。
+# - exe 与安装包请通过 GitHub Releases 发布。

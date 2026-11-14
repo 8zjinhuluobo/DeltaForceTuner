@@ -1,0 +1,4 @@
+﻿79FB7B105170141ED863331D36833A73062E66BF5291B2364FE3A64C18336203  514154112  D:\APPs_D\Steam\steamapps\common\Delta Force\Game\DeltaForce\Binaries\Win64\DeltaForceClient-Win64-Shipping.exe
+8FE1D8D4935B4CD572AC8EB3A46C188C83E1BFDA2259681098211E55286F76FE  3251672  D:\APPs_D\Steam\steamapps\common\Delta Force\Game\DeltaForce\Binaries\Win64\AntiCheatExpert\ACE-Service64.exe
+349ACB95D8308AC10884E4A37C9A2C2B3B557E469646E7EB301B9208786E9B72  7902680  D:\APPs_D\Steam\steamapps\common\Delta Force\Game\DeltaForce\Binaries\Win64\AntiCheatExpert\SGuard\x64\SGuard64.exe
+2064356BE9F94116C1A834CB4CFF7149AACC59211CA668F0428163C295102286  2094552  D:\APPs_D\Steam\steamapps\common\Delta Force\Game\DeltaForce\Binaries\Win64\AntiCheatExpert\SGuard\x64\SGuardSvc64.exe

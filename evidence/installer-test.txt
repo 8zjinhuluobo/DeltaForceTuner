@@ -1,0 +1,38 @@
+原生 C++ 安装器测试记录
+========================
+
+安装包：dist\DeltaForceTunerSetup.exe
+SHA256：F0B8637F445FACC3FC0E5B9A673E8B4711A7C047E52A2AC6F8D123F089719B0E
+主程序：dist\DeltaForceTuner.exe
+主程序 SHA256：43C14A5F290DC2DD2765305319BB3C2DEE334F668BDA5C4C2BC71A67C4376DA5
+
+编译器：
+- g++ 8.1.0 (i686-w64-mingw32)
+- windres (MinGW)
+- 静态链接，不依赖 MinGW DLL
+
+已验证：
+1. 静默安装到临时目录：
+   DeltaForceTunerSetup.exe --install --dir=<临时目录> --no-shortcuts --no-registry --no-launch
+   结果：成功，文件完整（主程序、卸载器、README、说明、预览、SHA256）
+
+2. 安装后的主程序自检：
+   <临时目录>\DeltaForceTuner.exe --selftest=...
+   结果：RESULT=PASS warnings=0
+
+3. 静默卸载 + 自动删除自身：
+   <临时目录>\Uninstall.exe --quiet --dir=<临时目录> --no-registry
+   结果：程序文件和目录被删除；卸载器自删除成功
+
+4. 安装向导窗口创建/绘制冒烟测试：
+   DeltaForceTunerSetup.exe --ui-test
+   结果：窗口创建并自动关闭，无崩溃
+
+未能在当前沙箱验证：
+- 开始菜单/桌面快捷方式创建（需要真实用户 shell/COM 环境）
+- HKCU 卸载信息写入（沙箱禁止注册表写入）
+- 通过 Windows“应用和功能”触发卸载
+这些代码路径使用标准 SHCreateDirectoryExW / IShellLinkW / RegCreateKeyExW，
+在正常桌面用户下不需要管理员权限。
+
+安装包未做商业代码签名，SmartScreen 可能提示“未知发布者”。
