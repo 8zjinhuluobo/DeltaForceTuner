@@ -166,6 +166,26 @@ powershell -NoProfile -ExecutionPolicy Bypass -File build-cpp.ps1
 - 本仓库所在的 `deepseek-harness` 工作区目录带完整性标签（Mandatory Label\Low Mandatory Level），在该目录里直接运行安装包会静默失败（退出码 1、不装文件、不写日志），因为它继承低完整性级别、写不了 `%LocalAppData%` 和 `%TEMP%`。这是目录环境问题，不是安装包缺陷：把 `DeltaForceTunerSetup.exe` 复制到桌面或任意普通目录再运行即可（真机验收就是这么做的）。
 - HAGS 是否有效取决于显卡/驱动，标为“可选”，不会默认开启。
 
+## 从源码构建
+
+仓库只收源码，`dist\*.exe`、`dist\*.zip`、`assets\app.ico`、`dist\preview.png`、`evidence\*.png` 均被 `.gitignore` 排除（见该文件末尾说明）。因此首次构建前需要先把图标和预览图生成出来：
+
+```powershell
+# 1) 编译主程序（assets\app.ico 缺失时会自动调用 assets\make-icon.ps1 生成）
+.\build.ps1
+# 2) 生成安装包要嵌入的界面预览图
+.\dist\DeltaForceTuner.exe --render dist\preview.png
+# 3) 打包安装程序（内嵌主程序、说明、预览图、哈希）
+.\build-cpp.ps1
+```
+
+工具链依赖：
+
+- `csc`：`C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe`（.NET Framework 4.8，系统自带）
+- `g++` / `windres`：MinGW（脚本顶部默认指向 RedPanda-CPP 自带的 MinGW，路径不同需自行修改）
+
+产物：`dist\DeltaForceTuner.exe`（便携版）、`dist\DeltaForceTunerSetup.exe`（安装包），哈希分别写入 `dist\SHA256.txt` 与 `dist\Setup-SHA256.txt`。
+
 ## 更新记录
 
 - 1.0.1（2026-11-14）
